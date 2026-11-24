@@ -1,0 +1,118 @@
+{
+  "proyek": {
+    "nama": "Pipeline Otomatis Cuaca dan Gempa",
+    "kelompok": "Kelompok 8 - Topik 5 Log dan Pipeline Otomatis"
+  },
+
+  "wilayah": {
+    "nama": "Selatan Jawa Timur - Bali (zona subduksi)",
+    "lat_pusat": -8.5,
+    "lon_pusat": 113.0,
+    "radius_km": 500
+  },
+
+  "periode": {
+    "tanggal_mulai": "2024-01-01",
+    "tanggal_selesai": "2024-12-31"
+  },
+
+  "zona_waktu": "Asia/Jakarta",
+
+  "api": {
+    "open_meteo": {
+      "url": "https://archive-api.open-meteo.com/v1/archive",
+      "variabel_per_jam": [
+        "temperature_2m",
+        "relative_humidity_2m",
+        "pressure_msl",
+        "precipitation",
+        "wind_speed_10m"
+      ]
+    },
+    "usgs": {
+      "url": "https://earthquake.usgs.gov/fdsnws/event/1/query",
+      "format": "geojson",
+      "magnitudo_min": 2.5
+    }
+  },
+
+  "jaringan": {
+    "timeout_detik": 30,
+    "maks_percobaan": 3,
+    "jeda_awal_detik": 2
+  },
+
+  "cache": {
+    "gunakan_cache": true
+  },
+
+  "fallback_sintetis": {
+    "aktif": false,
+    "seed": 42,
+    "jumlah_gempa_per_tahun": 350
+  },
+
+  "path": {
+    "folder_raw": "data/raw",
+    "folder_processed": "data/processed",
+    "file_kunci_anomali": "data/kunci/kunci_anomali.csv",
+    "file_data_gabungan": "data/processed/data_gabungan.csv",
+    "file_data_uji_anomali": "data/processed/data_uji_anomali.csv",
+    "file_gempa_bersih": "data/processed/gempa_bersih.csv",
+    "file_log": "logs/pipeline.log",
+    "folder_output": "output"
+  },
+
+  "validasi": {
+    "min_baris": 5000,
+    "min_kolom_utama": 4,
+    "kolom_wajib_cuaca": ["time", "temperature_2m", "relative_humidity_2m", "pressure_msl", "precipitation"],
+    "kolom_wajib_gempa": ["id", "time", "mag", "place", "longitude", "latitude", "depth", "type"],
+    "kolom_kunci_join": ["waktu_lokal"],
+    "rentang_nilai": {
+      "temperature_2m": [-10, 50],
+      "relative_humidity_2m": [0, 100],
+      "pressure_msl": [900, 1100],
+      "precipitation": [0, 500],
+      "gempa_mag_maks": [0, 10],
+      "gempa_jumlah": [0, 1000]
+    }
+  },
+
+  "penanaman_anomali": {
+    "seed": 7,
+    "kolom": ["temperature_2m", "pressure_msl"],
+    "jumlah_per_kolom": 20,
+    "besar_min_sigma": 3.0,
+    "besar_maks_sigma": 8.0
+  },
+
+  "detektor": {
+    "kolom": ["temperature_2m", "pressure_msl"],
+    "jendela_jam": 24,
+    "k_sigma": 4.0
+  },
+
+  "evaluasi": {
+    "toleransi_jam": 0
+  },
+
+  "korelasi": {
+    "agregasi": "harian",
+    "pasangan": [
+      ["delta_tekanan", "gempa_jumlah"],
+      ["delta_tekanan", "gempa_mag_maks"],
+      ["temperature_2m", "gempa_jumlah"],
+      ["precipitation", "gempa_jumlah"],
+      ["pressure_msl", "gempa_mag_maks"]
+    ]
+  },
+
+  "simulasi_gagal": {
+    "aktif": true,
+    "url_jaringan_mati": "http://127.0.0.1:9/tidak-ada",
+    "timeout_detik": 2,
+    "maks_percobaan": 2,
+    "jeda_awal_detik": 0.5
+  }
+}
